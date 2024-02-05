@@ -1,0 +1,34 @@
+#version 420 core
+#extension GL_OES_standard_derivatives : enable
+
+layout (location = 0) out vec4 out_color;
+
+in vec2 shared_position;
+in vec2 shared_uv;
+in vec2 shared_offset;
+in float shared_zoom_f;
+in float shared_aspect_ratio;
+in float shared_rotation_rad;
+
+void main () {
+	
+	// Scale coordinates to make grid lines appear in the larger resolution.
+	vec2 coord = 1.0 / 64 * shared_uv / shared_zoom_f;
+	coord.x *= shared_aspect_ratio;
+	
+	// Handle rotation.
+	vec2 forw = vec2(cos(shared_rotation_rad), sin(shared_rotation_rad));
+	vec2 side = vec2(-forw.y, forw.x);
+	
+	vec2 rotation_origin = vec2(0, 0);
+	vec2 diff = coord - rotation_origin;
+	coord = vec2(dot(diff, forw), dot(diff, side));
+	
+	coord -= shared_offset;
+	
+	// Output the grid.
+	vec2 grid = abs(fract(coord - 0.5) - 0.5) / fwidth(coord);
+	float line = min(grid.x, grid.y);
+	float color = 1.0 - min(line, 1.0);
+	out_color = 0.55 * vec4(0.143, 0.4, 0.3030, 1) + vec4(vec3(color * 0.3), 1.0);
+}

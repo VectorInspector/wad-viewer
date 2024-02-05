@@ -1,0 +1,29 @@
+#version 420 core
+#extension GL_ARB_explicit_uniform_location : enable
+
+layout (location = 0) in vec2 attr_position;
+layout (location = 1) in vec2 attr_uv;
+
+layout (location = 2) uniform float unif_zoom_f;
+layout (location = 3) uniform float unif_aspect_ratio;
+layout (location = 4) uniform vec2 unif_offset;
+layout (location = 5) uniform float unif_rotation_rad;
+
+out vec2 shared_position;
+out vec2 shared_uv;
+out vec2 shared_offset;
+out float shared_zoom_f;
+out float shared_aspect_ratio;
+out float shared_rotation_rad;
+
+void main () {
+	gl_Position.xy = attr_position;
+	gl_Position.zw = vec2(1, 1);
+	
+	shared_uv = attr_uv;
+	shared_position = attr_position;
+	shared_zoom_f = unif_zoom_f;
+	shared_aspect_ratio = unif_aspect_ratio;
+	shared_offset = unif_offset;
+	shared_rotation_rad = unif_rotation_rad;
+}

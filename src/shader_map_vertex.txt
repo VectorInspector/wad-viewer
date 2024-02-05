@@ -1,0 +1,38 @@
+#version 420 core
+#extension GL_ARB_explicit_uniform_location : enable
+
+layout (location = 0) in vec2 attr_map_pos;
+layout (location = 1) in float attr_alpha;
+
+layout (location = 0) uniform vec2 offset;
+layout (location = 1) uniform float scale;
+layout (location = 2) uniform float rad;
+layout (location = 3) uniform float aspect_ratio;
+layout (location = 4) uniform float unif_rotation_rad;
+
+out float shared_alpha;
+
+void main () {
+	
+	// Handle rotation by projection.
+	vec2 forw = vec2(cos(unif_rotation_rad), sin(unif_rotation_rad));
+	vec2 side = vec2(-forw.y, forw.x);
+	
+	// First scale.
+	gl_Position.xy = attr_map_pos * scale;
+	
+	// Rotate xy.
+	vec2 rotation_origin = vec2(0, 0);
+	vec2 diff = gl_Position.xy - rotation_origin;
+	gl_Position.xy = vec2(dot(diff, forw), -dot(diff, side));
+	
+	// Now offset everything.
+	gl_Position.xy -= offset * scale;
+	
+	// Handle aspect ratio and depth.
+	gl_Position.x /= aspect_ratio;
+	gl_Position.z = 1;
+	gl_Position.w = 1;
+	
+	shared_alpha = attr_alpha;
+}
